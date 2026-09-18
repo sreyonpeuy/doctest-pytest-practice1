@@ -44,6 +44,8 @@ def compile_italic_underscore(line):
             accumulator += x
 
     return print(accumulator)
+
+
 '''
 compile_italic_underscores('_This is italic!_ This is not italic.')
     accumulator = ''
@@ -62,6 +64,7 @@ compile_italic_underscores('_This is italic!_ This is not italic.')
             accumulator += x
     return accumulator
 '''
+
 
 def compile_bold_stars(line):
     '''
@@ -132,10 +135,18 @@ def compile_links(line):
         if i <= skip_until:
             continue
         if x == '[':
-            close_bracket = line.find(']', i)
-            open_paren = line.find('(', close_bracket) if close_bracket != -1 else -1
-            close_paren = line.find(')', open_paren) if open_paren != -1 else -1
-            if close_bracket != -1 and open_paren == close_bracket + 1 and close_paren != -1:
+            open_paren = -1
+            if close_bracket != -1:
+                 open_paren = line.find('(', close_bracket)
+
+            close_paren = -1
+            if open_paren != -1:
+                close_paren = line.find(')', open_paren)
+
+            has_valid_bracket = close_bracket != -1
+            has_adjacent_paren = open_paren == close_bracket + 1
+            has_valid_close_paren = close_paren != -1
+            if has_valid_bracket and has_adjacent_paren and has_valid_close_paren:
                 text = line[i + 1:close_bracket]
                 url = line[open_paren + 1:close_paren]
                 accumulator += f'<a href="{url}">{text}</a>'
