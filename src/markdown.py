@@ -68,7 +68,7 @@ def compile_bold_stars(line):
     '***'
     '''
     twostar = line.count('**')
-    con = twostar - (twostar % 2)
+    co = twostar - (twostar % 2)
     accumulator = ''
     c = 0
     in_bold = False
@@ -77,13 +77,13 @@ def compile_bold_stars(line):
         if skip:
             skip = False
             continue
-        if (x == '*' and i + 1 < len(line) and  line[i + 1]  == '*' and c < con):
+        if (x == '*' and i + 1 < len(line) and line[i + 1] == '*' and c < co):
             if (in_bold):
                 accumulator += '</b>'
             else:
                 accumulator += '<b>'
             in_bold = not in_bold
-            con += 1
+            co += 1
             skip = True
         else:
             accumulator += x
