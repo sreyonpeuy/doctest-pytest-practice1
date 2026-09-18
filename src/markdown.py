@@ -29,8 +29,39 @@ def compile_italic_underscore(line):
     >>> compile_italic_underscore('')
     ''
     '''
-    return line
+    accumulator = ''
+    inside_italic = False
 
+    for x in line:
+        if x == '_':
+            if inside_italic:
+                accumulator += '</i>'
+            else:
+                accumulator += '<i>'
+
+            inside_italic = not inside_italic
+        else:
+            accumulator += x
+
+    return print(accumulator)
+'''
+compile_italic_underscores('_This is italic!_ This is not italic.')
+    accumulator = ''
+    skip_until = -1
+    for i, x in enumerate(line):
+        if i <= skip_until:
+            continue
+        if x == '_':
+            close = line.find('_', i + 1)
+            if close != -1:
+                accumulator += '<i>' + line[i + 1:close] + '</i>'
+                skip_until = close
+            else:
+                accumulator += x
+        else:
+            accumulator += x
+    return accumulator
+'''
 
 def compile_bold_stars(line):
     '''
@@ -53,7 +84,17 @@ def compile_bold_stars(line):
     >>> compile_bold_stars('***')
     '***'
     '''
-    return line
+    accumulator = ''
+    j_edited = False
+    for i, x in enumerate(line):
+        if x == '*' and line[i + 1] == '*':
+            accumulator += '<b>'
+            j_edited = True
+        else:
+            if not j_edited:
+                accumulator += x
+            j_edited = False
+    return print(accumulator)
 
 
 def compile_links(line):
@@ -67,21 +108,17 @@ def compile_links(line):
     find the start and stop locations using the strings find function.
 
     >>> compile_links('Click on the [course webpage](https:
-        //github.com/mikeizbicki/cmc-csci040)!')
-    'Click on the <a href="https://github.com/mikeizbicki
-    /cmc-csci040">course webpage</a>!'
+    ... //github.com/mikeizbicki/cmc-csci040)!')
+    'Click on the <a href="https://github.com/mikeizbicki/cmc-csci040">course webpage</a>!'
     >>> compile_links('[course webpage](https://github.com/
-    mikeizbicki/cmc-csci040)')
-    '<a href="https://github.com/mikeizbicki/
-    cmc-csci040">course webpage</a>'
+    ... mikeizbicki/cmc-csci040)')
+    '<a href="https://github.com/mikeizbicki/cmc-csci040">course webpage</a>'
     >>> compile_links('this is wrong: [course webpage]
-    (https://github.com/mikeizbicki/cmc-csci040)')
-    'this is wrong: [course webpage]    (https:/
-    /github.com/mikeizbicki/cmc-csci040)'
+    ... (https://github.com/mikeizbicki/cmc-csci040)')
+    'this is wrong: [course webpage]    (https://github.com/mikeizbicki/cmc-csci040)'
     >>> compile_links('this is wrong: [course webpage]
-    (https://github.com/mikeizbicki/cmc-csci040')
-    'this is wrong: [course webpage](https:/
-    /github.com/mikeizbicki/cmc-csci040'
+    ... (https://github.com/mikeizbicki/cmc-csci040')
+    'this is wrong: [course webpage](https://github.com/mikeizbicki/cmc-csci040'
     >>> compile_links('[a](1) and [b](2)')
     '<a href="1">a</a> and <a href="2">b</a>'
     >>> compile_links('(parens) then [t](u)')
@@ -89,4 +126,22 @@ def compile_links(line):
     >>> compile_links('nothing here](oops)')
     'nothing here](oops)'
     '''
-    return line
+    accumulator = ''
+    skip_until = -1
+    for i, x in enumerate(line):
+        if i <= skip_until:
+            continue
+        if x == '[':
+            close_bracket = line.find(']', i)
+            open_paren = line.find('(', close_bracket) if close_bracket != -1 else -1
+            close_paren = line.find(')', open_paren) if open_paren != -1 else -1
+            if close_bracket != -1 and open_paren == close_bracket + 1 and close_paren != -1:
+                text = line[i + 1:close_bracket]
+                url = line[open_paren + 1:close_paren]
+                accumulator += f'<a href="{url}">{text}</a>'
+                skip_until = close_paren
+            else:
+                accumulator += x
+        else:
+            accumulator += x
+    return print(accumulator)
