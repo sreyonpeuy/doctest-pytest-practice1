@@ -29,7 +29,7 @@ def compile_italic_underscore(line):
     ''
     '''
     underscores = line.count('_')
-    converts = underscores - (underscores % 2) #takes care of last _
+    converts = underscores - (underscores % 2)
     accumulator = ''
     inside_italic = False
     count = 0
@@ -68,25 +68,23 @@ def compile_bold_stars(line):
     '***'
     '''
     twostar = line.count('**')
-    converts = twostar - (twostar % 2)#to remove only when ** tgt
+    convert = twostar - (twostar % 2)
     accumulator = ''
     count = 0
     in_bold = False
     skip = False
     for i, x in enumerate(line):
+        if2 = line[i + 1]
         if skip:
             skip = False
             continue
-        if (x == '*'
-        and i + 1 < len(line)
-        and line[i + 1] == '*'
-        and count < converts):
-            if(in_bold):
+        if (x == '*' and i + 1 < len(line) and if2 == '*' and count < convert):
+            if (in_bold):
                 accumulator += '</b>'
             else:
                 accumulator += '<b>'
             in_bold = not in_bold
-            converts += 1
+            convert += 1
             skip = True
         else:
             accumulator += x
@@ -116,14 +114,12 @@ def compile_links(line):
         if i <= skip_until:
             continue
         if x == '[':
-            close_bracket = line.find(']', i)
-            if(close_bracket != -1
-            and close_bracket + 1 < len(line)
-            and line[close_bracket + 1] == '('):
-                open_paren = close_bracket + 1
+            c_b = line.find(']', i)
+            if (c_b != -1 and c_b + 1 < len(line) and line[c_b + 1] == '('):
+                open_paren = c_b + 1
                 close_paren = line.find(')', open_paren)
             if close_paren != -1:
-                text = line[i + 1:close_bracket]
+                text = line[i + 1:c_b]
                 url = line[open_paren + 1:close_paren]
                 accumulator += f'<a href="{url}">{text}</a>'
                 skip_until = close_paren
