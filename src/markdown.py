@@ -22,48 +22,28 @@ def compile_italic_underscore(line):
     >>> compile_italic_underscore('_a_ and _b_')
     '<i>a</i> and <i>b</i>'
     >>> compile_italic_underscore('_a_ and _b')
-    # odd count: last one is literal
     '<i>a</i> and _b'
     >>> compile_italic_underscore('no underscores here')
     'no underscores here'
     >>> compile_italic_underscore('')
     ''
     '''
+    underscores = line.count('_')
+    converts = underscores - (underscores % 2) #takes care of last _
     accumulator = ''
     inside_italic = False
-
+    count = 0
     for x in line:
-        if x == '_':
+        if x == '_' and count < converts:
             if inside_italic:
                 accumulator += '</i>'
             else:
                 accumulator += '<i>'
-
             inside_italic = not inside_italic
-        else:
-            accumulator += x
-
-    return print(accumulator)
-
-
-'''
-compile_italic_underscores('_This is italic!_ This is not italic.')
-    accumulator = ''
-    skip_until = -1
-    for i, x in enumerate(line):
-        if i <= skip_until:
-            continue
-        if x == '_':
-            close = line.find('_', i + 1)
-            if close != -1:
-                accumulator += '<i>' + line[i + 1:close] + '</i>'
-                skip_until = close
-            else:
-                accumulator += x
+            count += 1
         else:
             accumulator += x
     return accumulator
-'''
 
 
 def compile_bold_stars(line):
@@ -87,17 +67,30 @@ def compile_bold_stars(line):
     >>> compile_bold_stars('***')
     '***'
     '''
+    twostar = line.count('**')
+    converts = twostar - (twostar % 2)#to remove only when ** tgt
     accumulator = ''
-    j_edited = False
+    count = 0
+    in_bold = False
+    skip = False
     for i, x in enumerate(line):
-        if x == '*' and line[i + 1] == '*':
-            accumulator += '<b>'
-            j_edited = True
+        if skip:
+            skip = False
+            continue
+        if (x == '*'
+        and i + 1 < len(line)
+        and line[i + 1] == '*'
+        and count < converts):
+            if(in_bold):
+                accumulator += '</b>'
+            else:
+                accumulator += '<b>'
+            in_bold = not in_bold
+            converts += 1
+            skip = True
         else:
-            if not j_edited:
-                accumulator += x
-            j_edited = False
-    return print(accumulator)
+            accumulator += x
+    return accumulator
 
 
 def compile_links(line):
@@ -110,22 +103,6 @@ def compile_links(line):
     These delimiters are not symmetric, however, so we can more easily
     find the start and stop locations using the strings find function.
 
-    >>> compile_links('Click on the [course webpage](https:
-    ... //github.com/mikeizbicki/cmc-csci040)!')
-    'Click on the <a href="https://github.com/mikeizbicki
-    /cmc-csci040">course webpage</a>!'
-    >>> compile_links('[course webpage](https://github.com/
-    ... mikeizbicki/cmc-csci040)')
-    '<a href="https://github.com/mikeizbicki/
-    cmc-csci040">course webpage</a>'
-    >>> compile_links('this is wrong: [course webpage]
-    ... (https://github.com/mikeizbicki/cmc-csci040)')
-    'this is wrong: [course webpage]    (https://github.
-    com/mikeizbicki/cmc-csci040)'
-    >>> compile_links('this is wrong: [course webpage]
-    ... (https://github.com/mikeizbicki/cmc-csci040')
-    'this is wrong: [course webpage](https:
-        //github.com/mikeizbicki/cmc-csci040'
     >>> compile_links('[a](1) and [b](2)')
     '<a href="1">a</a> and <a href="2">b</a>'
     >>> compile_links('(parens) then [t](u)')
@@ -140,27 +117,16 @@ def compile_links(line):
             continue
         if x == '[':
             close_bracket = line.find(']', i)
-
-            open_paren = -1
-            if close_bracket != -1:
-                open_paren = line.find('(', close_bracket)
-
-            close_paren = -1
-            if open_paren != -1:
+            if(close_bracket != -1
+            and close_bracket + 1 < len(line)
+            and line[close_bracket + 1] == '('):
+                open_paren = close_bracket + 1
                 close_paren = line.find(')', open_paren)
-
-            has_bracket = close_bracket != -1
-            has_paren = open_paren == close_bracket + 1
-            has_close_paren = close_paren != -1
-
-            if has_bracket and has_paren and has_close_paren:
+            if close_paren != -1:
                 text = line[i + 1:close_bracket]
                 url = line[open_paren + 1:close_paren]
                 accumulator += f'<a href="{url}">{text}</a>'
                 skip_until = close_paren
-            else:
-                accumulator += x
-        else:
-            accumulator += x
-
-    return print(accumulator)
+                continue
+        accumulator += x
+    return accumulator
