@@ -112,16 +112,20 @@ def compile_links(line):
 
     >>> compile_links('Click on the [course webpage](https:
     ... //github.com/mikeizbicki/cmc-csci040)!')
-    'Click on the <a href="https://github.com/mikeizbicki/cmc-csci040">course webpage</a>!'
+    'Click on the <a href="https://github.com/mikeizbicki
+    /cmc-csci040">course webpage</a>!'
     >>> compile_links('[course webpage](https://github.com/
     ... mikeizbicki/cmc-csci040)')
-    '<a href="https://github.com/mikeizbicki/cmc-csci040">course webpage</a>'
+    '<a href="https://github.com/mikeizbicki/
+    cmc-csci040">course webpage</a>'
     >>> compile_links('this is wrong: [course webpage]
     ... (https://github.com/mikeizbicki/cmc-csci040)')
-    'this is wrong: [course webpage]    (https://github.com/mikeizbicki/cmc-csci040)'
+    'this is wrong: [course webpage]    (https://github.
+    com/mikeizbicki/cmc-csci040)'
     >>> compile_links('this is wrong: [course webpage]
     ... (https://github.com/mikeizbicki/cmc-csci040')
-    'this is wrong: [course webpage](https://github.com/mikeizbicki/cmc-csci040'
+    'this is wrong: [course webpage](https:
+        //github.com/mikeizbicki/cmc-csci040'
     >>> compile_links('[a](1) and [b](2)')
     '<a href="1">a</a> and <a href="2">b</a>'
     >>> compile_links('(parens) then [t](u)')
@@ -135,18 +139,21 @@ def compile_links(line):
         if i <= skip_until:
             continue
         if x == '[':
+            close_bracket = line.find(']', i)
+
             open_paren = -1
             if close_bracket != -1:
-                 open_paren = line.find('(', close_bracket)
+                open_paren = line.find('(', close_bracket)
 
             close_paren = -1
             if open_paren != -1:
                 close_paren = line.find(')', open_paren)
 
-            has_valid_bracket = close_bracket != -1
-            has_adjacent_paren = open_paren == close_bracket + 1
-            has_valid_close_paren = close_paren != -1
-            if has_valid_bracket and has_adjacent_paren and has_valid_close_paren:
+            has_bracket = close_bracket != -1
+            has_paren = open_paren == close_bracket + 1
+            has_close_paren = close_paren != -1
+
+            if has_bracket and has_paren and has_close_paren:
                 text = line[i + 1:close_bracket]
                 url = line[open_paren + 1:close_paren]
                 accumulator += f'<a href="{url}">{text}</a>'
@@ -155,4 +162,5 @@ def compile_links(line):
                 accumulator += x
         else:
             accumulator += x
+
     return print(accumulator)
