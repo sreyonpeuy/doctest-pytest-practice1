@@ -1,14 +1,14 @@
-'''
-Integration tests for the functions in src/markdown.py.
+"""Integration tests for the functions in src/markdown.py.
 
 A real markdown compiler applies every rule to the same line of text,
 so these tests check that the compilers work together correctly.
-'''
+"""
 
-import os
+from pathlib import Path
 import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+# Ensure src module is discoverable when running tests directly
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from src.markdown import (  # noqa: E402
     compile_bold_stars,
@@ -17,10 +17,8 @@ from src.markdown import (  # noqa: E402
 )
 
 
-def compile_all(line):
-    '''
-    Apply every markdown compiler to a single line of text.
-    '''
+def compile_all(line: str) -> str:
+    """Apply every markdown compiler to a single line of text."""
     return compile_links(compile_bold_stars(compile_italic_underscore(line)))
 
 
@@ -47,10 +45,7 @@ def test_link_with_italic_text():
 
 def test_every_feature_on_one_line():
     line = 'See the [docs](https://x.com) for **more** _info_.'
-    expected = (
-        'See the <a href="https://x.com">docs</a> '
-        'for <b>more</b> <i>info</i>.'
-        )
+    expected = 'See the <a href="https://x.com">docs</a> for <b>more</b> <i>info</i>.'
     assert compile_all(line) == expected
 
 
@@ -61,7 +56,7 @@ def test_bold_and_italic_order_does_not_matter():
     assert bold_first == italic_first
 
 
-def test_compiling_twice_changes_nothing():
+def test_compiling_twice_is_idempotent():
     line = 'a [link](url) with **bold** and _italic_ text'
     once = compile_all(line)
     assert compile_all(once) == once
