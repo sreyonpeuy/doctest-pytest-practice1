@@ -68,23 +68,22 @@ def compile_bold_stars(line):
     '***'
     '''
     twostar = line.count('**')
-    convert = twostar - (twostar % 2)
+    con = twostar - (twostar % 2)
     accumulator = ''
-    count = 0
+    c = 0
     in_bold = False
     skip = False
     for i, x in enumerate(line):
-        if2 = line[i + 1]
         if skip:
             skip = False
             continue
-        if (x == '*' and i + 1 < len(line) and if2 == '*' and count < convert):
+        if (x == '*' and i + 1 < len(line) and  line[i + 1]  == '*' and c < con):
             if (in_bold):
                 accumulator += '</b>'
             else:
                 accumulator += '<b>'
             in_bold = not in_bold
-            convert += 1
+            con += 1
             skip = True
         else:
             accumulator += x
