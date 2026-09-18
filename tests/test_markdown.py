@@ -45,7 +45,8 @@ def test_link_with_italic_text():
 
 def test_every_feature_on_one_line():
     line = 'See the [docs](https://x.com) for **more** _info_.'
-    expected = 'See the <a href="https://x.com">docs</a> for <b>more</b> <i>info</i>.'
+    expected = 'See the <a href="https://x.com">docs</a> '\
+           'for <b>more</b> <i>info</i>.'
     assert compile_all(line) == expected
 
 
